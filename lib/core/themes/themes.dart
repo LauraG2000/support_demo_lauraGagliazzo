@@ -11,7 +11,7 @@ class Themes {
     colorScheme: ColorScheme(
       brightness: Brightness.light,
       primary: CustomColors.primary,
-      onPrimary: Colors.white,
+      onPrimary: CustomColors.primary,
       secondary: CustomColors.secondary,
       onSecondary: Colors.white,
       error: Colors.red,
@@ -22,6 +22,7 @@ class Themes {
       surfaceDim: CustomColors.textPrimary,
       shadow: CustomColors.cardBorder,
     ),
+     splashFactory: NoSplash.splashFactory, 
 
     scaffoldBackgroundColor: CustomColors.background,
 
@@ -33,7 +34,7 @@ class Themes {
         fontWeight: FontWeight.w600,
         fontSize: 20,
       ),
-      iconTheme: IconThemeData(color: CustomColors.icon),
+      iconTheme: IconThemeData(color: CustomColors.primary),
     ),
 
     cardTheme: (

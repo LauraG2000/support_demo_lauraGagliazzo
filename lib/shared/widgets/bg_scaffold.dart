@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:joyflo_project/shared/constants/spacing.dart';
 import 'package:joyflo_project/shared/constants/padding_values.dart';
+import 'package:joyflo_project/core/themes/custom_colors.dart';
 
 class BackgroundScaffold extends StatelessWidget {
   final Widget child;
@@ -14,8 +15,8 @@ class BackgroundScaffold extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Theme.of(context).colorScheme.onSurface,
-
+     backgroundColor: CustomColors.background,  
+     
       appBar: PreferredSize(
         preferredSize: const Size.fromHeight(Spacing.v100),
         child: AppBar(

@@ -3,6 +3,7 @@ import 'package:flutter_svg/flutter_svg.dart';
 import 'package:joyflo_project/shared/widgets/bg_scaffold.dart';
 import 'package:joyflo_project/shared/constants/spacing.dart';
 import 'package:joyflo_project/shared/constants/radius_values.dart';
+import 'support_form_page.dart';
 
 class SupportHomePage extends StatelessWidget {
   const SupportHomePage({super.key});
@@ -15,7 +16,15 @@ class SupportHomePage extends StatelessWidget {
           _SupportCard(
             assetPath: 'assets/icons/main_icon.svg',
             title: "Supporto tecnico",
-            onTap: () {},
+              onTap: () {
+        // Naviga alla nuova pagina
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (context) => const SupportFormPage(),
+          ),
+        );
+      },
           ),
           const SizedBox(height: Spacing.v20),
           _SupportCard(
