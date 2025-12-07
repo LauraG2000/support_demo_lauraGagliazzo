@@ -1,230 +1,222 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:joyflo_project/shared/constants/icon_size.dart';
 import 'package:joyflo_project/shared/constants/spacing.dart';
 import 'package:joyflo_project/shared/constants/radius_values.dart';
 import 'package:joyflo_project/shared/constants/padding_values.dart';
 import 'package:joyflo_project/shared/widgets/bg_scaffold.dart';
+import 'package:joyflo_project/shared/custom/action_buttons.dart';
 
-class SupportFormPage extends StatefulWidget {
-  const SupportFormPage({super.key});
-
-  @override
-  State<SupportFormPage> createState() => _SupportFormPageState();
-}
-
-class _SupportFormPageState extends State<SupportFormPage> {
+class SupportFormPage extends StatelessWidget {
   final TextEditingController _questionController = TextEditingController();
-  String? _selectedSection;
-  bool _canSave = true;
 
   final List<String> _sections = ["Pagamenti", "Ordini", "Altro"];
 
-  void _checkLength() {
-    setState(() {
-      _canSave = _questionController.text.length <= 10;
-    });
-  }
-
-  @override
-  void initState() {
-    super.initState();
-    _questionController.addListener(_checkLength);
-  }
-
-  @override
-  void dispose() {
-    _questionController.removeListener(_checkLength);
-    _questionController.dispose();
-    super.dispose();
-  }
+  SupportFormPage({super.key});
 
   @override
   Widget build(BuildContext context) {
     final themes = Theme.of(context).colorScheme;
 
-    final ButtonStyle buttonStyle = OutlinedButton.styleFrom(
-      minimumSize: const Size(PaddingValues.p100, PaddingValues.p36),
-      padding: const EdgeInsets.symmetric(horizontal: Spacing.h20),
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(RadiusValues.r16),
-      ),
-      side: BorderSide(color: themes.shadow.withValues(alpha: 0.8), width: 0.2),
-    );
-
-    final borderStyle = OutlineInputBorder(
-      borderRadius: BorderRadius.circular(RadiusValues.r13),
-      borderSide: BorderSide(
-        color: themes.shadow.withValues(alpha: 0.8),
-        width: 0.1,
-      ),
-    );
+    String? selectedSection;
 
     return BackgroundScaffold(
-      // ---- CONTENUTO ----
-      child: SingleChildScrollView(
+      child: CustomScrollView(
         physics: const ClampingScrollPhysics(),
-        padding: const EdgeInsets.all(PaddingValues.p10),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            // ---- MAIN IMAGE + TEXT ----
-            Center(
-              child: Column(
-                children: [
-                  SvgPicture.asset(
-                    'assets/icons/main_icon.svg',
-                    width: Spacing.h100,
-                    height: Spacing.v100,
-                    fit: BoxFit.contain,
+        slivers: [
+          SliverToBoxAdapter(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                // ---- MAIN IMAGE + TEXT ----
+                Center(
+                  child: Column(
+                    children: [
+                      SvgPicture.asset(
+                        'assets/icons/main_icon_lg.svg',
+                        fit: BoxFit.contain,
+                      ),
+                      const SizedBox(height: Spacing.v16),
+                      SizedBox(
+                        width: Spacing.h280,
+                        child: Text(
+                          "Ciao, come possiamo aiutarti?",
+                          textAlign: TextAlign.center,
+                          maxLines: 2,
+                          overflow: TextOverflow.ellipsis,
+                          style: Theme.of(context).textTheme.titleMedium
+                              ?.copyWith(color: themes.surfaceDim),
+                        ),
+                      ),
+                    ],
                   ),
-                  const SizedBox(height: Spacing.v16),
-                  Text(
-                    "Ciao, come possiamo aiutarti?",
-                    textAlign: TextAlign.center,
-                    style: Theme.of(context,
-                    ).textTheme.bodyMedium?.copyWith(color: themes.surfaceDim),
+                ),
+
+                const SizedBox(height: Spacing.v24),
+
+                // ---- DROPDOWN LABEL ----
+                Align(
+                  alignment: Alignment.centerLeft,
+                  child: Text(
+                    "Seleziona una sezione o argomento",
+                    style: Theme.of(
+                      context,
+                    ).textTheme.bodyLarge?.copyWith(color: themes.surfaceDim),
                   ),
-                ],
-              ),
-            ),
-
-            const SizedBox(height: Spacing.v24),
-
-            // ---- DROPDOWN ----
-            Text(
-              "Seleziona una sezione o un argomento",
-              style: Theme.of(context,
-              ).textTheme.bodyMedium?.copyWith(color: themes.surfaceDim),
-            ),
-            const SizedBox(height: Spacing.v16),
-
-            DropdownButtonFormField<String>(
-              initialValue: _selectedSection,
-              decoration: InputDecoration(
-                filled: true,
-                fillColor: themes.surface,
-                labelText: "Seleziona sezione",
-                border: borderStyle,
-                enabledBorder: borderStyle,
-                focusedBorder: borderStyle,
-                contentPadding: const EdgeInsets.symmetric(
-                  vertical: 12,
-                  horizontal: 12,
                 ),
-              ),
-              items: _sections
-                  .map((e) => DropdownMenuItem(value: e, child: Text(e)))
-                  .toList(),
-              onChanged: (val) {
-                setState(() {
-                  _selectedSection = val;
-                });
-              },
-            ),
+                const SizedBox(height: Spacing.v8),
 
-            const SizedBox(height: Spacing.v20),
-
-            // ---- TEXTFIELD ----
-            Text(
-              "Formula la tua domanda",
-              style: Theme.of(
-                context,
-              ).textTheme.bodyMedium?.copyWith(color: themes.surfaceDim),
-            ),
-            const SizedBox(height: Spacing.v16),
-
-            Container(
-              padding: const EdgeInsets.all(12),
-              decoration: BoxDecoration(
-                color: themes.surface,
-                borderRadius: BorderRadius.circular(RadiusValues.r13),
-                border: Border.all(
-                  color: themes.shadow.withValues(alpha: 0.8),
-                  width: 0.1,
+                // ---- DROPDOWN ----
+                StatefulBuilder(
+                  builder: (context, setState) {
+                    return SizedBox(
+                      height: Spacing.v40,
+                      width: Spacing.h320,
+                      child: DropdownButtonFormField<String>(
+                        initialValue: selectedSection,
+                        hint: Text(
+                          "Seleziona sezione o argomento",
+                          style: Theme.of(context).textTheme.bodySmall
+                              ?.copyWith(color: themes.surfaceContainerHighest),
+                        ),
+                        decoration: InputDecoration(
+                          suffixIcon: Icon(
+                            CupertinoIcons.chevron_down,
+                            color: themes.surfaceDim.withValues(alpha: 0.5),
+                            size: IconSize.s20,
+                          ),
+                        ),
+                        style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                          color: themes.surfaceDim,
+                        ),
+                        items: _sections.map((e) {
+                          return DropdownMenuItem(
+                            value: e,
+                            child: Text(
+                              e,
+                              style: Theme.of(context).textTheme.bodySmall
+                                  ?.copyWith(color: themes.surfaceDim),
+                            ),
+                          );
+                        }).toList(),
+                        onChanged: (val) {
+                          setState(() {
+                            selectedSection = val;
+                          });
+                        },
+                      ),
+                    );
+                  },
                 ),
-              ),
-              child: ConstrainedBox(
-                constraints: const BoxConstraints(
-                  minHeight: 150,
-                  maxHeight: 600,
+
+                const SizedBox(height: Spacing.v20),
+
+                // ---- TEXTAREA LABEL ----
+                Align(
+                  alignment: Alignment.centerLeft,
+                  child: Text(
+                    "Formula la tua domanda",
+                    style: Theme.of(
+                      context,
+                    ).textTheme.bodyLarge?.copyWith(color: themes.surfaceDim),
+                  ),
                 ),
-                child: Scrollbar(
-                  thumbVisibility: true,
-                  interactive: true,
-                  trackVisibility: false,
-                  child: TextField(
-                    controller: _questionController,
-                    maxLines: null,
-                    keyboardType: TextInputType.multiline,
-                    scrollPhysics: const ClampingScrollPhysics(),
-                    inputFormatters: [LengthLimitingTextInputFormatter(10)],
-                    decoration: const InputDecoration(
-                      hintText: "Scrivi qui...",
-                      border: InputBorder.none,
-                      isDense: true,
-                      contentPadding: EdgeInsets.zero,
+                const SizedBox(height: Spacing.v16),
+
+                // ---- TEXTAREA ----
+                Container(
+                  padding: const EdgeInsets.all(PaddingValues.p12),
+                  decoration: BoxDecoration(
+                    color: themes.surface,
+                    borderRadius: BorderRadius.circular(RadiusValues.r10),
+                    border: Border.all(
+                      color: themes.shadow.withValues(alpha: 0.8),
+                      width: 0.1,
+                    ),
+                  ),
+                  child: ConstrainedBox(
+                    constraints: const BoxConstraints(
+                      minHeight: Spacing.v150,
+                      maxHeight: Spacing.v600,
+                    ),
+                    child: Scrollbar(
+                      thumbVisibility: true,
+                      interactive: true,
+                      trackVisibility: false,
+                      child: TextField(
+                        controller: _questionController,
+                        maxLength: 10, // "counter""
+                        maxLines: null,
+                        keyboardType: TextInputType.multiline,
+                        style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                          color: themes.surfaceDim,
+                        ),
+                        decoration: InputDecoration(
+                          hintText: "Inserisci qui la tua domanda",
+                          hintStyle: Theme.of(context).textTheme.bodySmall
+                              ?.copyWith(color: themes.surfaceContainerHighest),
+                          isDense: true,
+                          contentPadding: EdgeInsets.zero,
+                          border: InputBorder.none,
+                          enabledBorder: InputBorder.none,
+                          focusedBorder: InputBorder.none,
+                        ),
+                      ),
                     ),
                   ),
                 ),
-              ),
-            ),
 
-            const SizedBox(height: Spacing.v20),
+                const SizedBox(height: Spacing.v20),
 
-            // ---- ADD IMAGE ----
-            Row(
-              children: [
-                Container(
-                  width: 50,
-                  height: 50,
-                  decoration: BoxDecoration(
-                    color: themes.surface.withValues(alpha: 0.7),
-                    borderRadius: BorderRadius.circular(RadiusValues.r13),
-                  ),
-                  child: const Center(child: Icon(Icons.add, size: 28)),
-                ),
-                const SizedBox(width: Spacing.h16),
-                Text(
-                  "Aggiungi immagini",
-                  style: Theme.of(
-                    context,
-                  ).textTheme.bodyMedium?.copyWith(color: themes.surfaceDim),
-                ),
-              ],
-            ),
-
-            const SizedBox(height: Spacing.v32),
-            // ---- BUTTONS ----
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                OutlinedButton(
-                  onPressed: () => Navigator.pop(context),
-                  style: buttonStyle.copyWith(
-                    backgroundColor: WidgetStatePropertyAll(Colors.transparent),
+                // ---- ADD IMAGE LABEL ----
+                Padding(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: PaddingValues.p12,
                   ),
                   child: Text(
-                    "Annulla",
-                    style: TextStyle(color: themes.surfaceDim, fontSize: 16),
+                    "Aggiungi immagini",
+                    style: Theme.of(
+                      context,
+                    ).textTheme.bodyMedium?.copyWith(color: themes.surfaceDim),
                   ),
                 ),
-                ElevatedButton(
-                  onPressed: _canSave ? () {} : null,
-                  style: buttonStyle.copyWith(
-                    backgroundColor: WidgetStatePropertyAll(themes.primary),
-                    foregroundColor: const WidgetStatePropertyAll(Colors.white),
-                  ),
-                  child: const Text("Invia"),
+                const SizedBox(height: Spacing.v20),
+
+                // ---- ADD IMAGE ----
+                Row(
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: [
+                    Container(
+                      width: 100,
+                      height: 100,
+                      decoration: BoxDecoration(
+                        color: themes.surfaceContainerHighest,
+                        borderRadius: BorderRadius.circular(
+                          RadiusValues.r20,
+                        ), // angoli smussati
+                      ),
+                      child: const Center(
+                        child: Icon(Icons.add, size: IconSize.s28),
+                      ),
+                    ),
+                    const SizedBox(width: Spacing.h16),
+                  ],
+                ),
+                const SizedBox(height: Spacing.v32),
+
+                // ---- BUTTONS ----
+                ActionButtons(
+                  onCancel: () => Navigator.pop(context),
+                  onSubmit: () {},
+                  primaryColor: themes.primary,
+                  cancelColor: Colors.transparent,
                 ),
               ],
             ),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }
 }
-// Todo: refactor dimensions and styles into constants and theme
-// Todo: fix button add image alignment + text position
-// Todo: split components

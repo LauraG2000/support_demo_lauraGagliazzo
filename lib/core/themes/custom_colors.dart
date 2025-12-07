@@ -10,11 +10,12 @@ class CustomColors {
   static const Color background = Color.fromRGBO(240, 240, 240, 1);
 
   // Text
-  static const Color textPrimary = Color.fromRGBO(33, 33, 33, 1);
-  static const Color textSecondary = Color.fromRGBO(117, 117, 117, 1);
+  static const Color textPrimary = Color.fromRGBO(58, 58, 58, 1);
+  static const Color textSecondary =  Color.fromRGBO(181, 181, 181, 1);
 
   // Cards / Surfaces
   static const Color card = Colors.white;
-  static const Color cardBorder = Color.fromARGB(255, 124, 124, 124);
+  static const Color cardBorder = Color.fromRGBO(181, 181, 181, 1);
+  static const Color iconAdd = Color.fromRGBO(217, 217, 217, 1);
 
 }

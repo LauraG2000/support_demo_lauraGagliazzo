@@ -9,5 +9,7 @@ class PaddingValues {
   static const double p32 = 32.0;
   static const double p36 = 36.0;
   static const double p40 = 40.0;
+  static const double p50 = 50.0;
+  static const double p80 = 80.0;
   static const double p100 = 100.0;
 }

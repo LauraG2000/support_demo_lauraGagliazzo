@@ -21,7 +21,7 @@ class SupportHomePage extends StatelessWidget {
         Navigator.push(
           context,
           MaterialPageRoute(
-            builder: (context) => const SupportFormPage(),
+            builder: (context) => SupportFormPage(),
           ),
         );
       },
