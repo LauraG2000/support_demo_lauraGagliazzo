@@ -11,20 +11,19 @@ class SupportHomePage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return BackgroundScaffold(
+      showBackButton: false,
       child: Column(
         children: [
           _SupportCard(
             assetPath: 'assets/icons/main_icon.svg',
             title: "Supporto tecnico",
-              onTap: () {
-        // Naviga alla nuova pagina
-        Navigator.push(
-          context,
-          MaterialPageRoute(
-            builder: (context) => SupportFormPage(),
-          ),
-        );
-      },
+            onTap: () {
+              // ---- NAVIGATE TO SUPPORT FORM PAGE ----
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => SupportFormPage()),
+              );
+            },
           ),
           const SizedBox(height: Spacing.v20),
           _SupportCard(
@@ -57,7 +56,6 @@ class _SupportCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-
     Widget imageWidget = SvgPicture.asset(
       assetPath,
       width: Spacing.h80,
@@ -68,17 +66,20 @@ class _SupportCard extends StatelessWidget {
       color: Theme.of(context).colorScheme.surface,
       elevation: 1,
       shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(RadiusValues.r13),
+        borderRadius: BorderRadius.circular(RadiusValues.r10),
         side: BorderSide(
           color: Theme.of(context).colorScheme.shadow.withValues(alpha: 0.8),
           width: 0.1,
         ),
       ),
       child: InkWell(
-        borderRadius: BorderRadius.circular(RadiusValues.r13),
+        borderRadius: BorderRadius.circular(RadiusValues.r10),
         onTap: onTap,
         child: Padding(
-          padding: const EdgeInsets.symmetric(vertical: Spacing.v20, horizontal: Spacing.h5),
+          padding: const EdgeInsets.symmetric(
+            vertical: Spacing.v20,
+            horizontal: Spacing.h5,
+          ),
           child: Row(
             children: [
               imageWidget,
@@ -87,8 +88,8 @@ class _SupportCard extends StatelessWidget {
                 child: Text(
                   title,
                   style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                        color: Theme.of(context).colorScheme.surfaceDim,
-                      ),
+                    color: Theme.of(context).colorScheme.surfaceDim,
+                  ),
                 ),
               ),
             ],

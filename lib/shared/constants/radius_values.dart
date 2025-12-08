@@ -6,4 +6,5 @@ class RadiusValues {
   static const double r20 = 20.0;
   static const double r24 = 24.0;
   static const double r32 = 32.0;
+  static const double r50 = 50.0;
 }

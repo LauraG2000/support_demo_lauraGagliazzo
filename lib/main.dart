@@ -37,7 +37,3 @@ class MyApp extends StatelessWidget {
 
   }
 }
-
-// Todo: refactor dimensions and styles into constants and theme
-// Todo: fix button add image alignment + text position
-// Todo: split components

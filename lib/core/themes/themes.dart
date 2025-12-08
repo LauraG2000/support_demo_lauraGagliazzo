@@ -10,8 +10,8 @@ class Themes {
     colorScheme: ColorScheme(
       brightness: Brightness.light,
       primary: CustomColors.primary,
-      onPrimary: CustomColors.primary,
-      secondary: CustomColors.secondary,
+      onPrimary: CustomColors.iconAddBg,
+      secondary: CustomColors.textSecondary,
       onSecondary: Colors.white,
       error: Colors.red,
       onError: Colors.red,
@@ -37,7 +37,7 @@ class Themes {
     // FORM GLOBAL STYLE
     inputDecorationTheme: InputDecorationTheme(
       filled: true,
-      fillColor: CustomColors.card, // testo interno / background card
+      fillColor: CustomColors.textPrimary, 
       hintStyle: TextStyle(
         fontFamily: "Poppins",
         fontWeight: FontWeight.w400,
@@ -77,7 +77,7 @@ class Themes {
         color: CustomColors.textPrimary,
       ),
       menuStyle: MenuStyle(
-        backgroundColor: WidgetStatePropertyAll(CustomColors.card), // lista = card
+        backgroundColor: WidgetStatePropertyAll(CustomColors.card), 
         shape: WidgetStatePropertyAll(
           RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(RadiusValues.r20),
