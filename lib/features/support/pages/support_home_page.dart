@@ -4,9 +4,13 @@ import 'package:joyflo_project/shared/widgets/bg_scaffold.dart';
 import 'package:joyflo_project/shared/constants/spacing.dart';
 import 'package:joyflo_project/shared/constants/radius_values.dart';
 import 'support_form_page.dart';
+import 'package:joyflo_project/core/data/services/api_service.dart';
+
 
 class SupportHomePage extends StatelessWidget {
-  const SupportHomePage({super.key});
+ final ApiService apiService;
+
+  const SupportHomePage({super.key, required this.apiService});
 
   @override
   Widget build(BuildContext context) {
@@ -21,7 +25,7 @@ class SupportHomePage extends StatelessWidget {
               // ---- NAVIGATE TO SUPPORT FORM PAGE ----
               Navigator.push(
                 context,
-                MaterialPageRoute(builder: (context) => SupportFormPage()),
+                MaterialPageRoute(builder: (context) => SupportFormPage(apiService: apiService,)),
               );
             },
           ),

@@ -2,6 +2,10 @@ import 'package:dropdown_button2/dropdown_button2.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:joyflo_project/core/data/models/domain_model.dart';
+import 'package:joyflo_project/core/data/services/api_service.dart';
+import 'package:joyflo_project/core/domains/usecases/get_domains_usecase.dart';
+import 'package:joyflo_project/features/cubit/support_cubit.dart';
 import 'package:joyflo_project/shared/constants/icon_size.dart';
 import 'package:joyflo_project/shared/constants/spacing.dart';
 import 'package:joyflo_project/shared/constants/radius_values.dart';
@@ -10,42 +14,86 @@ import 'package:joyflo_project/shared/widgets/bg_scaffold.dart';
 import 'package:joyflo_project/shared/custom/action_buttons.dart';
 
 class SupportFormPage extends StatefulWidget {
-  const SupportFormPage({super.key});
+  final ApiService apiService;
+
+  const SupportFormPage({super.key, required this.apiService});
 
   @override
   State<SupportFormPage> createState() => _SupportFormPageState();
 }
 
 class _SupportFormPageState extends State<SupportFormPage> {
-  final TextEditingController _questionController = TextEditingController();
+  late final SupportCubit _supportCubit;
 
-  final List<String> _sections = [
-    "Pagamenti",
-    "Ordini",
-    "Altro",
-    "Assistenza Tecnica",
-    "Resi",
-    "Account",
-    "Spedizioni",
-    "Promozioni, Offerte",
-    "Feedback",
-    "Collaborazioni",
-    "Bug Segnalazioni",
-    "Suggerimenti",
-    "Domande Frequenti",
-    "Informazioni Prodotti",
-    "Politiche e Termini",
-    "Supporto Generale",
-  ];
+  final TextEditingController _dropdownController = TextEditingController();
+  final TextEditingController _textareaController = TextEditingController();
+  final ScrollController _textareaScrollController = ScrollController(
+    initialScrollOffset: 0,
+  );
+  //lg
+  List<DomainData> _domains = [];
+  DomainData? selectedDomain;
+  String? _errorMessage;
+  bool _isLoading = true;
 
-  String? selectedSection;
+  @override
+  void initState() {
+    super.initState();
+    _supportCubit = SupportCubit(
+      getDomainsUseCase: GetDomainsUseCase(apiService: widget.apiService),
+    );
+    _loadDomains();
+  }
+
+  Future<void> _loadDomains() async {
+    setState(() {
+      _isLoading = true;
+      _errorMessage = null;
+    });
+
+    try {
+      // Recupero i dati tramite Cubit (solo chiamata)
+      final result = await _supportCubit.getDomainsUseCase.execute();
+      if (result.isSuccess) {
+        setState(() {
+          _domains = result.domains!;
+          _isLoading = false;
+        });
+      } else {
+        setState(() {
+          _errorMessage = result.error ?? "Errore sconosciuto";
+          _isLoading = false;
+        });
+      }
+    } catch (e) {
+      setState(() {
+        _errorMessage = e.toString();
+        _isLoading = false;
+      });
+    }
+  }
+
+  @override
+  void dispose() {
+    _supportCubit.close();
+    _dropdownController.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
     final themes = Theme.of(context).colorScheme;
 
+    if (_isLoading) {
+      return const Center(child: CircularProgressIndicator());
+    }
+
+    if (_errorMessage != null) {
+      return Center(child: Text("Errore: $_errorMessage"));
+    }
+
     return BackgroundScaffold(
-      showBackButton: true, 
+      showBackButton: true,
       child: Stack(
         children: [
           CustomScrollView(
@@ -100,14 +148,14 @@ class _SupportFormPageState extends State<SupportFormPage> {
                           SizedBox(
                             height: Spacing.v40,
                             width: Spacing.h320,
-                            child: DropdownButtonFormField2<String>(
+                            child: DropdownButtonFormField2<DomainData>(
                               isExpanded: true,
-                              value: selectedSection,
+                              value: selectedDomain,
                               hint: Text(
                                 "Seleziona sezione o argomento",
                                 style: Theme.of(context).textTheme.bodySmall
                                     ?.copyWith(color: themes.secondary),
-                                textAlign: TextAlign.start, 
+                                textAlign: TextAlign.start,
                               ),
                               decoration: InputDecoration(
                                 fillColor: themes.surface,
@@ -126,11 +174,11 @@ class _SupportFormPageState extends State<SupportFormPage> {
                               ),
                               style: Theme.of(context).textTheme.bodySmall
                                   ?.copyWith(color: themes.surfaceDim),
-                              items: _sections.map((e) {
-                                return DropdownMenuItem<String>(
+                              items: _domains.map((e) {
+                                return DropdownMenuItem<DomainData>(
                                   value: e,
                                   child: Text(
-                                    e,
+                                    (e.domValue ?? ""),
                                     style: Theme.of(context).textTheme.bodySmall
                                         ?.copyWith(color: themes.surfaceDim),
                                   ),
@@ -138,7 +186,9 @@ class _SupportFormPageState extends State<SupportFormPage> {
                               }).toList(),
                               onChanged: (val) {
                                 setState(() {
-                                  selectedSection = val;
+                                  selectedDomain = val;
+                                  _dropdownController.text =
+                                      val?.domValue ?? '';
                                 });
                               },
                               dropdownStyleData: DropdownStyleData(
@@ -164,8 +214,7 @@ class _SupportFormPageState extends State<SupportFormPage> {
                               ),
                               buttonStyleData: ButtonStyleData(
                                 padding: const EdgeInsets.only(
-                                  right:
-                                      Spacing.v10,
+                                  right: Spacing.v10,
                                 ),
                               ),
                             ),
@@ -203,27 +252,31 @@ class _SupportFormPageState extends State<SupportFormPage> {
                                 maxHeight: Spacing.v600,
                               ),
                               child: Scrollbar(
+                                controller: _textareaScrollController,
                                 thumbVisibility: true,
                                 interactive: true,
                                 trackVisibility: false,
-                                child: TextField(
-                                  controller: _questionController,
-                                  maxLength: 2000,
-                                  maxLines: null,
-                                  keyboardType: TextInputType.multiline,
-                                  style: Theme.of(context).textTheme.bodySmall
-                                      ?.copyWith(color: themes.surfaceDim),
-                                  decoration: InputDecoration(
-                                    hintText: "Inserisci qui la tua domanda",
-                                    hintStyle: Theme.of(context)
-                                        .textTheme
-                                        .bodySmall
-                                        ?.copyWith(color: themes.secondary),
-                                    isDense: true,
-                                    contentPadding: EdgeInsets.zero,
-                                    border: InputBorder.none,
-                                    enabledBorder: InputBorder.none,
-                                    focusedBorder: InputBorder.none,
+                                child: SingleChildScrollView(
+                                  controller: _textareaScrollController,
+                                  child: TextField(
+                                    controller: _textareaController,
+                                    maxLength: 2000,
+                                    maxLines: null,
+                                    keyboardType: TextInputType.multiline,
+                                    style: Theme.of(context).textTheme.bodySmall
+                                        ?.copyWith(color: themes.surfaceDim),
+                                    decoration: InputDecoration(
+                                      hintText: "Inserisci qui la tua domanda",
+                                      hintStyle: Theme.of(context)
+                                          .textTheme
+                                          .bodySmall
+                                          ?.copyWith(color: themes.secondary),
+                                      isDense: true,
+                                      contentPadding: EdgeInsets.zero,
+                                      border: InputBorder.none,
+                                      enabledBorder: InputBorder.none,
+                                      focusedBorder: InputBorder.none,
+                                    ),
                                   ),
                                 ),
                               ),
@@ -232,21 +285,21 @@ class _SupportFormPageState extends State<SupportFormPage> {
 
                           const SizedBox(height: Spacing.v20),
 
-                            // ---- ADD IMAGE LABEL ----
-                            Align(
+                          // ---- ADD IMAGE LABEL ----
+                          Align(
                             alignment: Alignment.centerLeft,
                             child: Padding(
                               padding: const EdgeInsets.symmetric(
-                              horizontal: PaddingValues.p12,
+                                horizontal: PaddingValues.p12,
                               ),
                               child: Text(
-                              "Aggiungi immagini",
-                              style: Theme.of(context).textTheme.bodyMedium
-                                ?.copyWith(color: themes.surfaceDim),
+                                "Aggiungi immagini",
+                                style: Theme.of(context).textTheme.bodyMedium
+                                    ?.copyWith(color: themes.surfaceDim),
                               ),
                             ),
-                            ),
-                            const SizedBox(height: Spacing.v20),
+                          ),
+                          const SizedBox(height: Spacing.v20),
 
                           // ---- ADD IMAGE ----
                           Row(
