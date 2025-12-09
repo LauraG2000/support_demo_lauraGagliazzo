@@ -37,7 +37,7 @@ class Themes {
     // FORM GLOBAL STYLE
     inputDecorationTheme: InputDecorationTheme(
       filled: true,
-      fillColor: CustomColors.textPrimary, 
+      fillColor: CustomColors.card, 
       hintStyle: TextStyle(
         fontFamily: "Poppins",
         fontWeight: FontWeight.w400,
