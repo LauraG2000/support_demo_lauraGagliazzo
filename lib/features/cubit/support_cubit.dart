@@ -1,8 +1,7 @@
 import 'dart:convert';
 import 'dart:io';
-
-import 'package:bloc/bloc.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_image_compress/flutter_image_compress.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:joyflo_project/core/data/models/user_contact_request.dart';
@@ -17,15 +16,10 @@ class SupportCubit extends Cubit<SupportState> {
   final GetDomainsUseCase getDomainsUseCase;
   final UserContactUseCase userContactUseCase;
 
-  SupportCubit({
-    required this.getDomainsUseCase,
-    required this.userContactUseCase,
-  }) : super(SupportState(images: []));
+  SupportCubit({required this.getDomainsUseCase, required this.userContactUseCase}) : super(SupportState(images: []));
 
   // Send request (for the page)
-  Future<UserContactResponse> sendAssistanceRequest(
-    UserContactRequest request,
-  ) async {
+  Future<UserContactResponse> sendAssistanceRequest(UserContactRequest request) async {
     return await userContactUseCase.sendAssistanceRequest(request);
   }
 
@@ -36,10 +30,7 @@ class SupportCubit extends Cubit<SupportState> {
     }
 
     try {
-      final XFile? photo = await ImagePicker().pickImage(
-        source: ImageSource.camera,
-        preferredCameraDevice: CameraDevice.rear,
-      );
+      final XFile? photo = await ImagePicker().pickImage(source: ImageSource.camera, preferredCameraDevice: CameraDevice.rear);
 
       if (photo == null) return "";
 
@@ -55,8 +46,7 @@ class SupportCubit extends Cubit<SupportState> {
 
       // !!! A Server could request this prefix !!!
       //final completeb64Str = "data:image/png;base64," +base64Str;
-      final updated = List<AssistanceImage>.from(state.images)
-        ..add(AssistanceImage(img: base64Str, ext: ".png"));
+      final updated = List<AssistanceImage>.from(state.images)..add(AssistanceImage(img: base64Str, ext: ".png"));
 
       emit(
         state.copyWith(
@@ -65,11 +55,7 @@ class SupportCubit extends Cubit<SupportState> {
         ),
       );
     } catch (e) {
-      print("Errore foto: $e");
-
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(SnackBar(content: Text("Si è verificato un errore: $e")));
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text("Si è verificato un errore: $e")));
     }
     return "";
   }
@@ -97,19 +83,13 @@ class SupportCubit extends Cubit<SupportState> {
     File result = file;
 
     while (true) {
-      final compressed = await FlutterImageCompress.compressWithFile(
-        file.path,
-        format: CompressFormat.png,
-        quality: quality,
-      );
+      final compressed = await FlutterImageCompress.compressWithFile(file.path, format: CompressFormat.png, quality: quality);
 
       if (compressed == null) break;
 
       if (compressed.length < maxSize || quality < 10) {
         final dir = await getTemporaryDirectory();
-        final outFile = File(
-          "${dir.path}/img_${DateTime.now().millisecondsSinceEpoch}.png",
-        );
+        final outFile = File("${dir.path}/img_${DateTime.now().millisecondsSinceEpoch}.png");
         await outFile.writeAsBytes(compressed);
         return outFile;
       }
@@ -122,6 +102,6 @@ class SupportCubit extends Cubit<SupportState> {
   // Remove Img
   void removeImage(AssistanceImage img) {
     final updated = List<AssistanceImage>.from(state.images)..remove(img);
-    emit(state.copyWith(images: updated, canAddImage: updated.length < 5)); // if < 5 -> abilit adding 
+    emit(state.copyWith(images: updated, canAddImage: updated.length < 5)); // if < 5 -> abilit adding
   }
 }

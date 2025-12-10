@@ -14,6 +14,8 @@ class Spacing {
   static const double v80 = 80.0;
   static const double v100 = 100.0;
   static const double v150 = 150.0;
+  static const double v250 = 250.0;
+  static const double v370 = 370.0;
   static const double v600 = 600.0;
 
   // Spazi orizzontali
@@ -34,6 +36,7 @@ class Spacing {
   static const double h130 = 130.0;
   static const double h200 = 200.0;
   static const double h260 = 260.0;
+  static const double h270 = 270.0;
   static const double h280 = 280.0;
   static const double h320 = 320.0;
 }

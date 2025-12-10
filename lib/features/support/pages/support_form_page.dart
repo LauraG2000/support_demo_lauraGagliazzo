@@ -1,5 +1,3 @@
-import 'dart:convert';
-
 import 'package:dropdown_button2/dropdown_button2.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
@@ -10,16 +8,13 @@ import 'package:joyflo_project/core/data/models/user_contact_request.dart';
 import 'package:joyflo_project/core/data/services/api_service.dart';
 import 'package:joyflo_project/core/domains/usecases/get_domains_usecase.dart';
 import 'package:joyflo_project/core/domains/usecases/user_contact_usecase.dart';
-import 'package:joyflo_project/core/themes/themes.dart';
-import 'package:joyflo_project/features/cubit/state/support_state.dart';
 import 'package:joyflo_project/features/cubit/support_cubit.dart';
-import 'package:joyflo_project/features/support/pages/support_home_page.dart';
+import 'package:joyflo_project/features/support/pages/support_form_images_page.dart';
 import 'package:joyflo_project/shared/constants/icon_size.dart';
 import 'package:joyflo_project/shared/constants/spacing.dart';
 import 'package:joyflo_project/shared/constants/radius_values.dart';
 import 'package:joyflo_project/shared/constants/padding_values.dart';
 import 'package:joyflo_project/shared/widgets/bg_scaffold.dart';
-import 'package:joyflo_project/shared/custom/action_buttons.dart';
 
 class SupportFormPage extends StatefulWidget {
   final ApiService apiService;
@@ -27,15 +22,15 @@ class SupportFormPage extends StatefulWidget {
   const SupportFormPage({super.key, required this.apiService});
 
   @override
-  State<SupportFormPage> createState() => _SupportFormPageState();
+  State<SupportFormPage> createState() => SupportFormPageState();
 }
 
-class _SupportFormPageState extends State<SupportFormPage> {
-  late final SupportCubit _supportCubit;
+class SupportFormPageState extends State<SupportFormPage> {
+  late final SupportCubit supportCubit;
 
-  final TextEditingController _dropdownController = TextEditingController();
-  final TextEditingController _textareaController = TextEditingController();
-  final ScrollController _textareaScrollController = ScrollController();
+  final TextEditingController dropdownController = TextEditingController();
+  final TextEditingController textareaController = TextEditingController();
+  final ScrollController textareaScrollController = ScrollController();
 
   List<DomainData> _domains = [];
   List<AssistanceImage> attachments = [];
@@ -46,7 +41,7 @@ class _SupportFormPageState extends State<SupportFormPage> {
   @override
   void initState() {
     super.initState();
-    _supportCubit = SupportCubit(
+    supportCubit = SupportCubit(
       getDomainsUseCase: GetDomainsUseCase(apiService: widget.apiService),
       userContactUseCase: UserContactUseCase(apiService: widget.apiService),
     );
@@ -60,8 +55,8 @@ class _SupportFormPageState extends State<SupportFormPage> {
     });
 
     try {
-      // Get data from cubit 
-      final result = await _supportCubit.getDomainsUseCase.execute();
+      // Get data from cubit
+      final result = await supportCubit.getDomainsUseCase.execute();
       if (result.isSuccess) {
         setState(() {
           _domains = result.domains!;
@@ -83,8 +78,8 @@ class _SupportFormPageState extends State<SupportFormPage> {
 
   @override
   void dispose() {
-    _supportCubit.close();
-    _dropdownController.dispose();
+    supportCubit.close();
+    dropdownController.dispose();
     super.dispose();
   }
 
@@ -101,7 +96,7 @@ class _SupportFormPageState extends State<SupportFormPage> {
     }
 
     return BlocProvider.value(
-      value: _supportCubit,
+      value: supportCubit,
       child: BackgroundScaffold(
         showBackButton: true,
         child: Stack(
@@ -117,10 +112,7 @@ class _SupportFormPageState extends State<SupportFormPage> {
                       Center(
                         child: Column(
                           children: [
-                            SvgPicture.asset(
-                              'assets/icons/main_icon_lg.svg',
-                              fit: BoxFit.contain,
-                            ),
+                            SvgPicture.asset('assets/icons/main_icon_lg.svg', fit: BoxFit.contain),
                             const SizedBox(height: Spacing.v16),
                             SizedBox(
                               width: Spacing.h280,
@@ -129,8 +121,7 @@ class _SupportFormPageState extends State<SupportFormPage> {
                                 textAlign: TextAlign.center,
                                 maxLines: 2,
                                 overflow: TextOverflow.ellipsis,
-                                style: Theme.of(context).textTheme.titleMedium
-                                    ?.copyWith(color: themes.surfaceDim),
+                                style: Theme.of(context).textTheme.titleMedium?.copyWith(color: themes.surfaceDim),
                               ),
                             ),
                           ],
@@ -144,8 +135,7 @@ class _SupportFormPageState extends State<SupportFormPage> {
                         alignment: Alignment.centerLeft,
                         child: Text(
                           "Seleziona una sezione o argomento",
-                          style: Theme.of(context).textTheme.bodyLarge
-                              ?.copyWith(color: themes.surfaceDim),
+                          style: Theme.of(context).textTheme.bodyLarge?.copyWith(color: themes.surfaceDim),
                         ),
                       ),
                       const SizedBox(height: Spacing.v8),
@@ -162,74 +152,46 @@ class _SupportFormPageState extends State<SupportFormPage> {
                                 value: selectedDomain,
                                 hint: Text(
                                   "Seleziona sezione o argomento",
-                                  style: Theme.of(context).textTheme.bodySmall
-                                      ?.copyWith(color: themes.secondary),
+                                  style: Theme.of(context).textTheme.bodySmall?.copyWith(color: themes.secondary),
                                   textAlign: TextAlign.start,
                                 ),
                                 decoration: InputDecoration(
                                   fillColor: themes.surface,
                                   filled: true,
-                                  contentPadding: const EdgeInsets.symmetric(
-                                    vertical: Spacing.v10,
-                                  ),
+                                  contentPadding: const EdgeInsets.symmetric(vertical: Spacing.v10),
                                   border: OutlineInputBorder(
-                                    borderRadius: BorderRadius.circular(
-                                      RadiusValues.r20,
-                                    ),
-                                    borderSide: BorderSide(
-                                      color: themes.shadow.withValues(
-                                        alpha: 0.5,
-                                      ),
-                                    ),
+                                    borderRadius: BorderRadius.circular(RadiusValues.r20),
+                                    borderSide: BorderSide(color: themes.shadow.withValues(alpha: 0.5)),
                                   ),
                                 ),
-                                style: Theme.of(context).textTheme.bodySmall
-                                    ?.copyWith(color: themes.surfaceDim),
+                                style: Theme.of(context).textTheme.bodySmall?.copyWith(color: themes.surfaceDim),
                                 items: _domains.map((e) {
                                   return DropdownMenuItem<DomainData>(
                                     value: e,
                                     child: Text(
                                       (e.domValue ?? ""),
-                                      style: Theme.of(context)
-                                          .textTheme
-                                          .bodySmall
-                                          ?.copyWith(color: themes.surfaceDim),
+                                      style: Theme.of(context).textTheme.bodySmall?.copyWith(color: themes.surfaceDim),
                                     ),
                                   );
                                 }).toList(),
                                 onChanged: (val) {
                                   setState(() {
                                     selectedDomain = val;
-                                    _dropdownController.text =
-                                        val?.domValue ?? '';
+                                    dropdownController.text = val?.domValue ?? '';
                                   });
                                 },
                                 dropdownStyleData: DropdownStyleData(
-                                  maxHeight: 250,
-                                  decoration: BoxDecoration(
-                                    color: themes.surface,
-                                    borderRadius: BorderRadius.circular(
-                                      RadiusValues.r20,
-                                    ),
-                                  ),
+                                  maxHeight: Spacing.v250,
+                                  decoration: BoxDecoration(color: themes.surface, borderRadius: BorderRadius.circular(RadiusValues.r20)),
                                   elevation: 0,
-                                  scrollbarTheme: ScrollbarThemeData(
-                                    thickness: WidgetStatePropertyAll(0),
-                                  ),
+                                  scrollbarTheme: ScrollbarThemeData(thickness: WidgetStatePropertyAll(0)),
                                   offset: const Offset(0, -1),
                                 ),
                                 iconStyleData: IconStyleData(
-                                  icon: Icon(
-                                    CupertinoIcons.chevron_down,
-                                    color: themes.secondary,
-                                  ),
+                                  icon: Icon(CupertinoIcons.chevron_down, color: themes.secondary),
                                   iconSize: IconSize.s20,
                                 ),
-                                buttonStyleData: ButtonStyleData(
-                                  padding: const EdgeInsets.only(
-                                    right: Spacing.v10,
-                                  ),
-                                ),
+                                buttonStyleData: ButtonStyleData(padding: const EdgeInsets.only(right: Spacing.v10)),
                               ),
                             ),
 
@@ -240,8 +202,7 @@ class _SupportFormPageState extends State<SupportFormPage> {
                               alignment: Alignment.centerLeft,
                               child: Text(
                                 "Formula la tua domanda",
-                                style: Theme.of(context).textTheme.bodyLarge
-                                    ?.copyWith(color: themes.surfaceDim),
+                                style: Theme.of(context).textTheme.bodyLarge?.copyWith(color: themes.surfaceDim),
                               ),
                             ),
                             const SizedBox(height: Spacing.v16),
@@ -251,449 +212,33 @@ class _SupportFormPageState extends State<SupportFormPage> {
                               padding: const EdgeInsets.all(PaddingValues.p12),
                               decoration: BoxDecoration(
                                 color: themes.surface,
-                                borderRadius: BorderRadius.circular(
-                                  RadiusValues.r10,
-                                ),
-                                border: Border.all(
-                                  color: themes.shadow.withValues(alpha: 0.8),
-                                  width: 0.1,
-                                ),
+                                borderRadius: BorderRadius.circular(RadiusValues.r10),
+                                border: Border.all(color: themes.shadow.withValues(alpha: 0.8), width: 0.1),
                               ),
-                              child: ConstrainedBox(
-                                constraints: const BoxConstraints(
-                                  minHeight: Spacing.v150,
-                                  maxHeight: Spacing.v600,
+                              child: TextField(
+                                controller: textareaController,
+                                maxLength: 2000,
+                                maxLines: 10,
+                                keyboardType: TextInputType.multiline,
+                                style: Theme.of(context).textTheme.bodySmall?.copyWith(color: themes.surfaceDim),
+                                decoration: InputDecoration(
+                                  hintText: "Inserisci qui la tua domanda",
+                                  hintStyle: Theme.of(context).textTheme.bodySmall?.copyWith(color: themes.secondary),
+                                  isDense: true,
+                                  contentPadding: EdgeInsets.zero,
+                                  border: InputBorder.none,
+                                  enabledBorder: InputBorder.none,
+                                  focusedBorder: InputBorder.none,
                                 ),
-                                child: Scrollbar(
-                                  controller: _textareaScrollController,
-                                  thumbVisibility: true,
-                                  interactive: true,
-                                  trackVisibility: false,
-                                  child: SingleChildScrollView(
-                                    controller: _textareaScrollController,
-                                    child: TextField(
-                                      controller: _textareaController,
-                                      maxLength: 2000,
-                                      maxLines: null,
-                                      keyboardType: TextInputType.multiline,
-                                      style: Theme.of(context)
-                                          .textTheme
-                                          .bodySmall
-                                          ?.copyWith(color: themes.surfaceDim),
-                                      decoration: InputDecoration(
-                                        hintText:
-                                            "Inserisci qui la tua domanda",
-                                        hintStyle: Theme.of(context)
-                                            .textTheme
-                                            .bodySmall
-                                            ?.copyWith(color: themes.secondary),
-                                        isDense: true,
-                                        contentPadding: EdgeInsets.zero,
-                                        border: InputBorder.none,
-                                        enabledBorder: InputBorder.none,
-                                        focusedBorder: InputBorder.none,
-                                      ),
-                                    ),
-                                  ),
-                                ),
-                              ),
-                            ),
-
-                            const SizedBox(height: Spacing.v20),
-
-                            // ---- ADD IMAGE LABEL----
-                            Align(
-                              alignment: Alignment.centerLeft,
-                              child: Row(
-                                mainAxisAlignment: MainAxisAlignment.start,
-                                children: [
-                                  Text(
-                                    "Aggiungi immagini",
-                                    style: Theme.of(context).textTheme.bodyLarge
-                                        ?.copyWith(color: themes.surfaceDim),
-                                  ),
-                                  const SizedBox(width: Spacing.h5),
-                                  Text(
-                                    "(Massimo 5)",
-                                    style: Theme.of(context).textTheme.bodySmall
-                                        ?.copyWith(color: themes.surfaceDim),
-                                  ),
-                                ],
                               ),
                             ),
                             const SizedBox(height: Spacing.v20),
-                            Align(
-                              alignment: Alignment.centerLeft,
-                              child: BlocBuilder<SupportCubit, SupportState>(
-                                builder: (context, state) {
-                                  attachments = List<AssistanceImage>.from(
-                                    state.images,
-                                  );
-
-                                  return Wrap(
-                                    spacing: 8,
-                                    runSpacing: 8,
-                                    children: [
-                                      // --- SHOW IMAGES ---
-                                      ...state.images.map((img) {
-                                        return Stack(
-                                          children: [
-                                            // img:
-                                            Container(
-                                              width: 100,
-                                              height: 100,
-                                              decoration: BoxDecoration(
-                                                color: Colors.grey.shade200,
-                                                borderRadius:
-                                                    BorderRadius.circular(10),
-                                                image: DecorationImage(
-                                                  image: MemoryImage(
-                                                    base64Decode(img.img),
-                                                  ),
-                                                  fit: BoxFit.cover,
-                                                ),
-                                              ),
-                                            ),
-
-                                            // Remove img
-                                            Positioned(
-                                              top: 2,
-                                              right: 2,
-                                              child: GestureDetector(
-                                                onTap: () {
-                                                  context
-                                                      .read<SupportCubit>()
-                                                      .removeImage(img);
-                                                },
-                                                child: Container(
-                                                  width: 20,
-                                                  height: 20,
-                                                  decoration: BoxDecoration(
-                                                    color: themes.surface
-                                                        .withValues(alpha: 0.8),
-                                                    shape: BoxShape.circle,
-                                                  ),
-                                                  child: Center(
-                                                    child: Icon(
-                                                      Icons.remove,
-                                                      size: 14,
-                                                      color: themes.primary,
-                                                    ),
-                                                  ),
-                                                ),
-                                              ),
-                                            ),
-                                          ],
-                                        );
-                                      }).toList(),
-
-                                      // Button ADD
-                                      if (state.canAddImage)
-                                        Material(
-                                          color: themes.onPrimary,
-                                          borderRadius: BorderRadius.circular(
-                                            RadiusValues.r10,
-                                          ),
-                                          child: Builder(
-                                            builder: (context) {
-                                              return InkWell(
-                                                borderRadius:
-                                                    BorderRadius.circular(
-                                                      RadiusValues.r10,
-                                                    ),
-                                                onTap: () async {
-                                                  final result = await context
-                                                      .read<SupportCubit>()
-                                                      .pickImageFromCamera(
-                                                        context,
-                                                      );
-                                                  if (result.isNotEmpty) {
-                                                    ScaffoldMessenger.of(
-                                                      context,
-                                                    ).showSnackBar(
-                                                      SnackBar(
-                                                        content: Text(result),
-                                                      ),
-                                                    );
-                                                  }
-                                                },
-                                                child: SizedBox(
-                                                  width: Spacing.h100,
-                                                  height: Spacing.v100,
-                                                  child: Center(
-                                                    child: Icon(
-                                                      CupertinoIcons.add,
-                                                      size: IconSize.s48,
-                                                      color: themes
-                                                          .surfaceContainerHighest,
-                                                    ),
-                                                  ),
-                                                ),
-                                              );
-                                            },
-                                          ),
-                                        ),
-                                    ],
-                                  );
-                                },
-                              ),
-                            ),
-
-                            const SizedBox(height: Spacing.v32),
-
-                            // Buttons
-                            ActionButtons(
-                              onCancel: () => Navigator.pop(context),
-                              onSubmit: () async {
-                                if (selectedDomain == null) {
-                                  ScaffoldMessenger.of(context).showSnackBar(
-                                    SnackBar(
-                                      content: Text("Seleziona un argomento"),
-                                      backgroundColor: Theme.of(
-                                        context,
-                                      ).colorScheme.onError,
-                                    ),
-                                  );
-                                  return;
-                                }
-                                if (_textareaController.text.trim().isEmpty) {
-                                  ScaffoldMessenger.of(context).showSnackBar(
-                                    SnackBar(
-                                      content: Text("Inserisci un messaggio"),
-                                      backgroundColor: Theme.of(
-                                        context,
-                                      ).colorScheme.onError,
-                                    ),
-                                  );
-                                  return;
-                                }
-                                // User Request
-                                final request = UserContactRequest(
-                                  userId:
-                                      1, // Not having a login -> ID is setted as a constant
-                                  typeRequest:
-                                      19785, // Defaulted to 19785 -> not documented
-                                  typeQuestion: selectedDomain!.idDomain,
-                                  message: _textareaController.text.trim(),
-                                  images: attachments,
-                                );
-
-                                try {
-                                  final _ = await _supportCubit
-                                      .sendAssistanceRequest(request);
-
-                                  // SUCCESS dialog
-                                  showDialog(
-                                    context: context,
-                                    barrierDismissible: false,
-                                    builder: (context) => Dialog(
-                                      shape: RoundedRectangleBorder(
-                                        borderRadius: BorderRadius.circular(16),
-                                      ),
-                                      child: Stack(
-                                        children: [
-                                          Padding(
-                                            padding: const EdgeInsets.all(24.0),
-                                            child: SingleChildScrollView(
-                                              child: Column(
-                                                mainAxisSize: MainAxisSize.min,
-                                                children: [
-                                                  SvgPicture.asset(
-                                                    'assets/icons/dialog_ok.svg',
-                                                    width: 270,
-                                                    height: 370,
-                                                    fit: BoxFit.contain,
-                                                  ),
-                                                  Text(
-                                                    "La tua domanda è stata inviata con successo!",
-                                                    style: Theme.of(context)
-                                                        .textTheme
-                                                        .bodyLarge
-                                                        ?.copyWith(
-                                                          color:
-                                                              themes.surfaceDim,
-                                                        ),
-                                                    textAlign: TextAlign.center,
-                                                    maxLines: 2,
-                                                  ),
-                                                  const SizedBox(
-                                                    height: Spacing.h12,
-                                                  ),
-                                                  Text(
-                                                    "Verrai ricontattato presto tramite mail",
-                                                    style: Theme.of(context)
-                                                        .textTheme
-                                                        .bodyMedium
-                                                        ?.copyWith(
-                                                          color: themes
-                                                              .surfaceDim
-                                                              .withValues(
-                                                                alpha: 0.7,
-                                                              ),
-                                                        ),
-                                                    textAlign: TextAlign.center,
-                                                    maxLines: 2,
-                                                  ),
-                                                  const SizedBox(
-                                                    height: Spacing.h24,
-                                                  ),
-                                                  // Button OK
-                                                  SizedBox(
-                                                    width: double.infinity,
-                                                    child: ElevatedButton(
-                                                      style:
-                                                          ElevatedButton.styleFrom(
-                                                            backgroundColor:
-                                                                themes.primary,
-                                                          ),
-                                                      onPressed: () {
-                                                        Navigator.pushAndRemoveUntil(
-                                                          context,
-                                                          MaterialPageRoute(
-                                                            builder: (context) =>
-                                                                SupportHomePage(
-                                                                  apiService: widget
-                                                                      .apiService,
-                                                                ),
-                                                          ),
-                                                          (route) =>
-                                                              false, // remove other pages
-                                                        );
-                                                      },
-                                                      child: Text(
-                                                        "OK",
-                                                        style: Theme.of(context)
-                                                            .textTheme
-                                                            .bodyMedium
-                                                            ?.copyWith(
-                                                              color: themes
-                                                                  .surface,
-                                                            ),
-                                                      ),
-                                                    ),
-                                                  ),
-                                                ],
-                                              ),
-                                            ),
-                                          ),
-                                          // Icon close
-                                          Positioned(
-                                            right: 0,
-                                            top: 0,
-                                            child: IconButton(
-                                              icon: Icon(
-                                                Icons.close,
-                                                size: IconSize.s34,
-                                                color: themes.surfaceDim,
-                                              ),
-                                              onPressed: () {
-                                                Navigator.pushAndRemoveUntil(
-                                                  context,
-                                                  MaterialPageRoute(
-                                                    builder: (context) =>
-                                                        SupportHomePage(
-                                                          apiService:
-                                                              widget.apiService,
-                                                        ),
-                                                  ),
-                                                  (route) => false,
-                                                );
-                                              },
-                                            ),
-                                          ),
-                                        ],
-                                      ),
-                                    ),
-                                  );
-                                } catch (e) {
-                                  // ---- Dialog di ERRORE ----
-                                  showDialog(
-                                    context: context,
-                                    barrierDismissible: false,
-                                    builder: (context) => Dialog(
-                                      shape: RoundedRectangleBorder(
-                                        borderRadius: BorderRadius.circular(16),
-                                      ),
-                                      child: Stack(
-                                        children: [
-                                          Padding(
-                                            padding: const EdgeInsets.all(24.0),
-                                            child: SingleChildScrollView(
-                                              child: Column(
-                                                mainAxisSize: MainAxisSize.min,
-                                                children: [
-                                                  // ---- SizedBox al posto dell'immagine ----
-                                                  SvgPicture.asset(
-                                                    'assets/icons/dialog_error.svg',
-                                                    width: 270,
-                                                    height: 370,
-                                                    fit: BoxFit.contain,
-                                                  ),
-
-                                                  // ---- Testo con colore dal tema ----
-                                                  Text(
-                                                    "Errore nell'invio della richiesta.",
-                                                    style: TextStyle(
-                                                      color: Theme.of(
-                                                        context,
-                                                      ).colorScheme.error,
-                                                      fontSize: 16,
-                                                      fontWeight:
-                                                          FontWeight.w600,
-                                                    ),
-                                                    textAlign: TextAlign.center,
-                                                  ),
-                                                  const SizedBox(height: 24),
-                                                  // ---- Button RETRY ----
-                                                  SizedBox(
-                                                    width: double.infinity,
-                                                    child: OutlinedButton(
-                                                      style:
-                                                          OutlinedButton.styleFrom(
-                                                            backgroundColor:
-                                                                Colors
-                                                                    .transparent,
-                                                            side: BorderSide(
-                                                              color: themes
-                                                                  .primary,
-                                                            ),
-                                                          ),
-                                                      onPressed: () =>
-                                                          Navigator.of(
-                                                            context,
-                                                          ).pop(),
-                                                      child: const Text(
-                                                        "RIPROVA",
-                                                      ),
-                                                    ),
-                                                  ),
-                                                ],
-                                              ),
-                                            ),
-                                          ),
-
-                                          // Icon close
-                                          Positioned(
-                                            right: 0,
-                                            top: 0,
-                                            child: IconButton(
-                                              icon: Icon(
-                                                Icons.close,
-                                                size: IconSize.s34,
-                                                color: themes.surfaceDim,
-                                              ),
-                                              onPressed: () =>
-                                                  Navigator.of(context).pop(),
-                                            ),
-                                          ),
-                                        ],
-                                      ),
-                                    ),
-                                  );
-                                }
-                              },
-                              primaryColor: themes.primary,
-                              cancelColor: Colors.transparent,
+                            // Rest of the page
+                            AssistanceImageSection(
+                              supportCubit: supportCubit,
+                              textareaController: textareaController,
+                              selectedDomain: selectedDomain,
+                              apiService: widget.apiService,
                             ),
                           ],
                         ),
