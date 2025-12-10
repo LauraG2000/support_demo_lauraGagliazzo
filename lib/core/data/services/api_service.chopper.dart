@@ -26,4 +26,14 @@ final class _$ApiService extends ApiService {
     final Request $request = Request('GET', $url, client.baseUrl);
     return client.send<dynamic, dynamic>($request);
   }
+
+  @override
+  Future<Response<dynamic>> sendAssistanceRequestRaw(
+    Map<String, dynamic> body,
+  ) {
+    final Uri $url = Uri.parse('/user/user-contact/request');
+    final $body = body;
+    final Request $request = Request('POST', $url, client.baseUrl, body: $body);
+    return client.send<dynamic, dynamic>($request);
+  }
 }

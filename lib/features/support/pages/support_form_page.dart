@@ -3,8 +3,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:joyflo_project/core/data/models/domain_model.dart';
+import 'package:joyflo_project/core/data/models/user_contact_request.dart';
 import 'package:joyflo_project/core/data/services/api_service.dart';
 import 'package:joyflo_project/core/domains/usecases/get_domains_usecase.dart';
+import 'package:joyflo_project/core/domains/usecases/user_contact_usecase.dart';
 import 'package:joyflo_project/features/cubit/support_cubit.dart';
 import 'package:joyflo_project/shared/constants/icon_size.dart';
 import 'package:joyflo_project/shared/constants/spacing.dart';
@@ -30,8 +32,9 @@ class _SupportFormPageState extends State<SupportFormPage> {
   final ScrollController _textareaScrollController = ScrollController(
     initialScrollOffset: 0,
   );
-  //lg
+
   List<DomainData> _domains = [];
+  List<AssistanceImage> _attachments = [];
   DomainData? selectedDomain;
   String? _errorMessage;
   bool _isLoading = true;
@@ -41,6 +44,7 @@ class _SupportFormPageState extends State<SupportFormPage> {
     super.initState();
     _supportCubit = SupportCubit(
       getDomainsUseCase: GetDomainsUseCase(apiService: widget.apiService),
+      userContactUseCase: UserContactUseCase(apiService: widget.apiService),
     );
     _loadDomains();
   }
@@ -330,7 +334,49 @@ class _SupportFormPageState extends State<SupportFormPage> {
                           // ---- BUTTONS ----
                           ActionButtons(
                             onCancel: () => Navigator.pop(context),
-                            onSubmit: () {},
+                            onSubmit: () async {
+                              if (selectedDomain == null) {
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  SnackBar(
+                                    content: Text("Seleziona un argomento"),
+                                  ),
+                                );
+                                return;
+                              }
+                              if (_textareaController.text.trim().isEmpty) {
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  SnackBar(
+                                    content: Text("Inserisci un messaggio"),
+                                  ),
+                                );
+                                return;
+                              }
+                              final request = UserContactRequest(
+                                userId: 1, // Not having a login -> ID is setted as a constant
+                                typeRequest: 19785, // Defaulted to 19785 -> not documented
+                                typeQuestion: selectedDomain!.idDomain,
+                                message: _textareaController.text.trim(),
+                                images: _attachments,
+                              );
+                              try {
+                                final response = await _supportCubit
+                                    .sendAssistanceRequest(request);
+
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  SnackBar(
+                                    content: Text(
+                                      "Richiesta inviata: ${response.message}",
+                                    ),
+                                  ),
+                                );
+
+                               
+                              } catch (e) {
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  SnackBar(content: Text("Errore: $e")),
+                                );
+                              }
+                            },
                             primaryColor: themes.primary,
                             cancelColor: Colors.transparent,
                           ),

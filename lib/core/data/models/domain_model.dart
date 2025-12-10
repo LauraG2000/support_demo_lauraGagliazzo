@@ -9,7 +9,7 @@ class DomainResponse {
   final int code;
   final String message;
   
-  /// La chiave è String perché nel JSON è "0", "2", "4", ...
+  // Key is String -> JSON = "0", "2", "4",
   final Map<String, DomainData> data;
 
   DomainResponse({

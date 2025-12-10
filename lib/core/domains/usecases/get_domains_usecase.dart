@@ -1,7 +1,7 @@
 import 'package:joyflo_project/core/data/models/domain_model.dart';
 import 'package:joyflo_project/core/data/services/api_service.dart';
 
-/// Classe che rappresenta il risultato dell'UseCase
+// Class for result of usecase
 class GetDomainsResult {
   final List<DomainData>? domains;
   final String? error;
@@ -16,13 +16,12 @@ class GetDomainsUseCase {
 
   GetDomainsUseCase({required this.apiService});
 
-  /// Metodo principale dell'use case
+  // Principal method 
   Future<GetDomainsResult> execute() async {
     try {
       final List<DomainData> domains = await apiService.fetchDomValues();
       return GetDomainsResult(domains: domains);
     } on Exception catch (e) {
-      // Cattura tutte le eccezioni e ritorna un messaggio leggibile
       return GetDomainsResult(error: e.toString());
     }
   }
