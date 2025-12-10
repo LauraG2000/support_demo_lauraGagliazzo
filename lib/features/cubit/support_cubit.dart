@@ -31,7 +31,6 @@ class SupportCubit extends Cubit<SupportState> {
 
   // Picking image
   Future<String> pickImageFromCamera(BuildContext context) async {
-    
     if (state.images.length >= 5) {
       return "Troppe immagini allegate";
     }
@@ -59,7 +58,12 @@ class SupportCubit extends Cubit<SupportState> {
       final updated = List<AssistanceImage>.from(state.images)
         ..add(AssistanceImage(img: base64Str, ext: ".png"));
 
-      emit(state.copyWith(images: updated));
+      emit(
+        state.copyWith(
+          images: updated,
+          canAddImage: updated.length < 5, // disabilit ADD if >= 5
+        ),
+      );
     } catch (e) {
       print("Errore foto: $e");
 
@@ -110,9 +114,14 @@ class SupportCubit extends Cubit<SupportState> {
         return outFile;
       }
 
-      quality -= 10; // gradual reduction 
+      quality -= 10; // gradual reduction
     }
-
     return result;
+  }
+
+  // Remove Img
+  void removeImage(AssistanceImage img) {
+    final updated = List<AssistanceImage>.from(state.images)..remove(img);
+    emit(state.copyWith(images: updated, canAddImage: updated.length < 5)); // if < 5 -> abilit adding 
   }
 }

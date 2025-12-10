@@ -10,6 +10,7 @@ import 'package:joyflo_project/core/data/models/user_contact_request.dart';
 import 'package:joyflo_project/core/data/services/api_service.dart';
 import 'package:joyflo_project/core/domains/usecases/get_domains_usecase.dart';
 import 'package:joyflo_project/core/domains/usecases/user_contact_usecase.dart';
+import 'package:joyflo_project/core/themes/themes.dart';
 import 'package:joyflo_project/features/cubit/state/support_state.dart';
 import 'package:joyflo_project/features/cubit/support_cubit.dart';
 import 'package:joyflo_project/features/support/pages/support_home_page.dart';
@@ -59,7 +60,7 @@ class _SupportFormPageState extends State<SupportFormPage> {
     });
 
     try {
-      // Recupero i dati tramite Cubit (solo chiamata)
+      // Get data from cubit 
       final result = await _supportCubit.getDomainsUseCase.execute();
       if (result.isSuccess) {
         setState(() {
@@ -300,101 +301,147 @@ class _SupportFormPageState extends State<SupportFormPage> {
 
                             const SizedBox(height: Spacing.v20),
 
-                            // ---- ADD IMAGE LABEL ----
+                            // ---- ADD IMAGE LABEL----
                             Align(
                               alignment: Alignment.centerLeft,
-                              child: Padding(
-                                padding: const EdgeInsets.symmetric(
-                                  horizontal: PaddingValues.p12,
-                                ),
-                                child: Text(
-                                  "Aggiungi immagini",
-                                  style: Theme.of(context).textTheme.bodyMedium
-                                      ?.copyWith(color: themes.surfaceDim),
-                                ),
+                              child: Row(
+                                mainAxisAlignment: MainAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    "Aggiungi immagini",
+                                    style: Theme.of(context).textTheme.bodyLarge
+                                        ?.copyWith(color: themes.surfaceDim),
+                                  ),
+                                  const SizedBox(width: Spacing.h5),
+                                  Text(
+                                    "(Massimo 5)",
+                                    style: Theme.of(context).textTheme.bodySmall
+                                        ?.copyWith(color: themes.surfaceDim),
+                                  ),
+                                ],
                               ),
                             ),
                             const SizedBox(height: Spacing.v20),
+                            Align(
+                              alignment: Alignment.centerLeft,
+                              child: BlocBuilder<SupportCubit, SupportState>(
+                                builder: (context, state) {
+                                  attachments = List<AssistanceImage>.from(
+                                    state.images,
+                                  );
 
-                            // ---- ADD IMAGE ----
-                            Row(
-                              crossAxisAlignment: CrossAxisAlignment.center,
-                              children: [
-                                Material(
-                                  color: themes.onPrimary,
-                                  borderRadius: BorderRadius.circular(
-                                    RadiusValues.r20,
-                                  ),
-                                  child: Builder(
-                                    builder: (context) {
-                                      return InkWell(
-                                        borderRadius: BorderRadius.circular(
-                                          RadiusValues.r20,
-                                        ),
-                                        onTap: () async {
-                                          final result = await context
-                                              .read<SupportCubit>()
-                                              .pickImageFromCamera(context);
-
-                                          if (result.isNotEmpty) {
-                                            ScaffoldMessenger.of(
-                                              context,
-                                            ).showSnackBar(
-                                              SnackBar(content: Text(result)),
-                                            );
-                                          }
-                                        },
-                                        child: SizedBox(
-                                          width: Spacing.h100,
-                                          height: Spacing.v100,
-                                          child: Center(
-                                            child: Icon(
-                                              CupertinoIcons.add,
-                                              size: IconSize.s48,
-                                              color: themes
-                                                  .surfaceContainerHighest,
+                                  return Wrap(
+                                    spacing: 8,
+                                    runSpacing: 8,
+                                    children: [
+                                      // --- SHOW IMAGES ---
+                                      ...state.images.map((img) {
+                                        return Stack(
+                                          children: [
+                                            // img:
+                                            Container(
+                                              width: 100,
+                                              height: 100,
+                                              decoration: BoxDecoration(
+                                                color: Colors.grey.shade200,
+                                                borderRadius:
+                                                    BorderRadius.circular(10),
+                                                image: DecorationImage(
+                                                  image: MemoryImage(
+                                                    base64Decode(img.img),
+                                                  ),
+                                                  fit: BoxFit.cover,
+                                                ),
+                                              ),
                                             ),
+
+                                            // Remove img
+                                            Positioned(
+                                              top: 2,
+                                              right: 2,
+                                              child: GestureDetector(
+                                                onTap: () {
+                                                  context
+                                                      .read<SupportCubit>()
+                                                      .removeImage(img);
+                                                },
+                                                child: Container(
+                                                  width: 20,
+                                                  height: 20,
+                                                  decoration: BoxDecoration(
+                                                    color: themes.surface
+                                                        .withValues(alpha: 0.8),
+                                                    shape: BoxShape.circle,
+                                                  ),
+                                                  child: Center(
+                                                    child: Icon(
+                                                      Icons.remove,
+                                                      size: 14,
+                                                      color: themes.primary,
+                                                    ),
+                                                  ),
+                                                ),
+                                              ),
+                                            ),
+                                          ],
+                                        );
+                                      }).toList(),
+
+                                      // Button ADD
+                                      if (state.canAddImage)
+                                        Material(
+                                          color: themes.onPrimary,
+                                          borderRadius: BorderRadius.circular(
+                                            RadiusValues.r10,
+                                          ),
+                                          child: Builder(
+                                            builder: (context) {
+                                              return InkWell(
+                                                borderRadius:
+                                                    BorderRadius.circular(
+                                                      RadiusValues.r10,
+                                                    ),
+                                                onTap: () async {
+                                                  final result = await context
+                                                      .read<SupportCubit>()
+                                                      .pickImageFromCamera(
+                                                        context,
+                                                      );
+                                                  if (result.isNotEmpty) {
+                                                    ScaffoldMessenger.of(
+                                                      context,
+                                                    ).showSnackBar(
+                                                      SnackBar(
+                                                        content: Text(result),
+                                                      ),
+                                                    );
+                                                  }
+                                                },
+                                                child: SizedBox(
+                                                  width: Spacing.h100,
+                                                  height: Spacing.v100,
+                                                  child: Center(
+                                                    child: Icon(
+                                                      CupertinoIcons.add,
+                                                      size: IconSize.s48,
+                                                      color: themes
+                                                          .surfaceContainerHighest,
+                                                    ),
+                                                  ),
+                                                ),
+                                              );
+                                            },
                                           ),
                                         ),
-                                      );
-                                    },
-                                  ),
-                                ),
-                              ],
+                                    ],
+                                  );
+                                },
+                              ),
                             ),
-                            BlocBuilder<SupportCubit, SupportState>(
-                              builder: (context, state) {
-                                attachments = List<AssistanceImage>.from(
-                                  state.images,
-                                );
-                                if (state.images.isEmpty) {
-                                  return const SizedBox.shrink();
-                                }
-                                return Wrap(
-                                  spacing: 8,
-                                  runSpacing: 8,
-                                  children: state.images.map((img) {
-                                    return Container(
-                                      width: 80,
-                                      height: 80,
-                                      decoration: BoxDecoration(
-                                        color: Colors.grey.shade200,
-                                        borderRadius: BorderRadius.circular(10),
-                                        image: DecorationImage(
-                                          image: MemoryImage(
-                                            base64Decode(img.img),
-                                          ),
-                                          fit: BoxFit.cover,
-                                        ),
-                                      ),
-                                    );
-                                  }).toList(),
-                                );
-                              },
-                            ),
+
                             const SizedBox(height: Spacing.v32),
 
-                            // ---- BUTTONS ----
+                            // Buttons
                             ActionButtons(
                               onCancel: () => Navigator.pop(context),
                               onSubmit: () async {
@@ -420,8 +467,7 @@ class _SupportFormPageState extends State<SupportFormPage> {
                                   );
                                   return;
                                 }
-
-                                // ---- Richiesta utente ----
+                                // User Request
                                 final request = UserContactRequest(
                                   userId:
                                       1, // Not having a login -> ID is setted as a constant
@@ -436,7 +482,7 @@ class _SupportFormPageState extends State<SupportFormPage> {
                                   final _ = await _supportCubit
                                       .sendAssistanceRequest(request);
 
-                                  // ---- Dialog di SUCCESSO ----
+                                  // SUCCESS dialog
                                   showDialog(
                                     context: context,
                                     barrierDismissible: false,
@@ -452,15 +498,12 @@ class _SupportFormPageState extends State<SupportFormPage> {
                                               child: Column(
                                                 mainAxisSize: MainAxisSize.min,
                                                 children: [
-                                                  // ---- SizedBox al posto dell'immagine ----
                                                   SvgPicture.asset(
                                                     'assets/icons/dialog_ok.svg',
                                                     width: 270,
                                                     height: 370,
                                                     fit: BoxFit.contain,
                                                   ),
-
-                                                  // ---- Testo con colore dal tema ----
                                                   Text(
                                                     "La tua domanda è stata inviata con successo!",
                                                     style: Theme.of(context)
@@ -476,7 +519,6 @@ class _SupportFormPageState extends State<SupportFormPage> {
                                                   const SizedBox(
                                                     height: Spacing.h12,
                                                   ),
-                                                  // ---- Secondo testo ----
                                                   Text(
                                                     "Verrai ricontattato presto tramite mail",
                                                     style: Theme.of(context)
@@ -495,7 +537,7 @@ class _SupportFormPageState extends State<SupportFormPage> {
                                                   const SizedBox(
                                                     height: Spacing.h24,
                                                   ),
-                                                  // ---- Pulsante OK ----
+                                                  // Button OK
                                                   SizedBox(
                                                     width: double.infinity,
                                                     child: ElevatedButton(
@@ -534,7 +576,7 @@ class _SupportFormPageState extends State<SupportFormPage> {
                                               ),
                                             ),
                                           ),
-                                          // ---- Croce in alto a destra ----
+                                          // Icon close
                                           Positioned(
                                             right: 0,
                                             top: 0,
@@ -602,7 +644,7 @@ class _SupportFormPageState extends State<SupportFormPage> {
                                                     textAlign: TextAlign.center,
                                                   ),
                                                   const SizedBox(height: 24),
-                                                  // ---- Pulsante RIPROVA ----
+                                                  // ---- Button RETRY ----
                                                   SizedBox(
                                                     width: double.infinity,
                                                     child: OutlinedButton(
@@ -630,7 +672,7 @@ class _SupportFormPageState extends State<SupportFormPage> {
                                             ),
                                           ),
 
-                                          // ---- Croce in alto a destra ----
+                                          // Icon close
                                           Positioned(
                                             right: 0,
                                             top: 0,
