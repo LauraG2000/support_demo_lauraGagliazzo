@@ -5,7 +5,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_svg/flutter_svg.dart';
-import 'package:image_picker/image_picker.dart';
 import 'package:joyflo_project/core/data/models/domain_model.dart';
 import 'package:joyflo_project/core/data/models/user_contact_request.dart';
 import 'package:joyflo_project/core/data/services/api_service.dart';
@@ -13,6 +12,7 @@ import 'package:joyflo_project/core/domains/usecases/get_domains_usecase.dart';
 import 'package:joyflo_project/core/domains/usecases/user_contact_usecase.dart';
 import 'package:joyflo_project/features/cubit/state/support_state.dart';
 import 'package:joyflo_project/features/cubit/support_cubit.dart';
+import 'package:joyflo_project/features/support/pages/support_home_page.dart';
 import 'package:joyflo_project/shared/constants/icon_size.dart';
 import 'package:joyflo_project/shared/constants/spacing.dart';
 import 'package:joyflo_project/shared/constants/radius_values.dart';
@@ -364,7 +364,9 @@ class _SupportFormPageState extends State<SupportFormPage> {
                             ),
                             BlocBuilder<SupportCubit, SupportState>(
                               builder: (context, state) {
-                                attachments = List<AssistanceImage>.from(state.images);
+                                attachments = List<AssistanceImage>.from(
+                                  state.images,
+                                );
                                 if (state.images.isEmpty) {
                                   return const SizedBox.shrink();
                                 }
@@ -400,6 +402,9 @@ class _SupportFormPageState extends State<SupportFormPage> {
                                   ScaffoldMessenger.of(context).showSnackBar(
                                     SnackBar(
                                       content: Text("Seleziona un argomento"),
+                                      backgroundColor: Theme.of(
+                                        context,
+                                      ).colorScheme.onError,
                                     ),
                                   );
                                   return;
@@ -408,10 +413,15 @@ class _SupportFormPageState extends State<SupportFormPage> {
                                   ScaffoldMessenger.of(context).showSnackBar(
                                     SnackBar(
                                       content: Text("Inserisci un messaggio"),
+                                      backgroundColor: Theme.of(
+                                        context,
+                                      ).colorScheme.onError,
                                     ),
                                   );
                                   return;
                                 }
+
+                                // ---- Richiesta utente ----
                                 final request = UserContactRequest(
                                   userId:
                                       1, // Not having a login -> ID is setted as a constant
@@ -421,20 +431,222 @@ class _SupportFormPageState extends State<SupportFormPage> {
                                   message: _textareaController.text.trim(),
                                   images: attachments,
                                 );
+
                                 try {
-                                  final response = await _supportCubit
+                                  final _ = await _supportCubit
                                       .sendAssistanceRequest(request);
 
-                                  ScaffoldMessenger.of(context).showSnackBar(
-                                    SnackBar(
-                                      content: Text(
-                                        "Richiesta inviata: ${response.message}",
+                                  // ---- Dialog di SUCCESSO ----
+                                  showDialog(
+                                    context: context,
+                                    barrierDismissible: false,
+                                    builder: (context) => Dialog(
+                                      shape: RoundedRectangleBorder(
+                                        borderRadius: BorderRadius.circular(16),
+                                      ),
+                                      child: Stack(
+                                        children: [
+                                          Padding(
+                                            padding: const EdgeInsets.all(24.0),
+                                            child: SingleChildScrollView(
+                                              child: Column(
+                                                mainAxisSize: MainAxisSize.min,
+                                                children: [
+                                                  // ---- SizedBox al posto dell'immagine ----
+                                                  SvgPicture.asset(
+                                                    'assets/icons/dialog_ok.svg',
+                                                    width: 270,
+                                                    height: 370,
+                                                    fit: BoxFit.contain,
+                                                  ),
+
+                                                  // ---- Testo con colore dal tema ----
+                                                  Text(
+                                                    "La tua domanda è stata inviata con successo!",
+                                                    style: Theme.of(context)
+                                                        .textTheme
+                                                        .bodyLarge
+                                                        ?.copyWith(
+                                                          color:
+                                                              themes.surfaceDim,
+                                                        ),
+                                                    textAlign: TextAlign.center,
+                                                    maxLines: 2,
+                                                  ),
+                                                  const SizedBox(
+                                                    height: Spacing.h12,
+                                                  ),
+                                                  // ---- Secondo testo ----
+                                                  Text(
+                                                    "Verrai ricontattato presto tramite mail",
+                                                    style: Theme.of(context)
+                                                        .textTheme
+                                                        .bodyMedium
+                                                        ?.copyWith(
+                                                          color: themes
+                                                              .surfaceDim
+                                                              .withValues(
+                                                                alpha: 0.7,
+                                                              ),
+                                                        ),
+                                                    textAlign: TextAlign.center,
+                                                    maxLines: 2,
+                                                  ),
+                                                  const SizedBox(
+                                                    height: Spacing.h24,
+                                                  ),
+                                                  // ---- Pulsante OK ----
+                                                  SizedBox(
+                                                    width: double.infinity,
+                                                    child: ElevatedButton(
+                                                      style:
+                                                          ElevatedButton.styleFrom(
+                                                            backgroundColor:
+                                                                themes.primary,
+                                                          ),
+                                                      onPressed: () {
+                                                        Navigator.pushAndRemoveUntil(
+                                                          context,
+                                                          MaterialPageRoute(
+                                                            builder: (context) =>
+                                                                SupportHomePage(
+                                                                  apiService: widget
+                                                                      .apiService,
+                                                                ),
+                                                          ),
+                                                          (route) =>
+                                                              false, // remove other pages
+                                                        );
+                                                      },
+                                                      child: Text(
+                                                        "OK",
+                                                        style: Theme.of(context)
+                                                            .textTheme
+                                                            .bodyMedium
+                                                            ?.copyWith(
+                                                              color: themes
+                                                                  .surface,
+                                                            ),
+                                                      ),
+                                                    ),
+                                                  ),
+                                                ],
+                                              ),
+                                            ),
+                                          ),
+                                          // ---- Croce in alto a destra ----
+                                          Positioned(
+                                            right: 0,
+                                            top: 0,
+                                            child: IconButton(
+                                              icon: Icon(
+                                                Icons.close,
+                                                size: IconSize.s34,
+                                                color: themes.surfaceDim,
+                                              ),
+                                              onPressed: () {
+                                                Navigator.pushAndRemoveUntil(
+                                                  context,
+                                                  MaterialPageRoute(
+                                                    builder: (context) =>
+                                                        SupportHomePage(
+                                                          apiService:
+                                                              widget.apiService,
+                                                        ),
+                                                  ),
+                                                  (route) => false,
+                                                );
+                                              },
+                                            ),
+                                          ),
+                                        ],
                                       ),
                                     ),
                                   );
                                 } catch (e) {
-                                  ScaffoldMessenger.of(context).showSnackBar(
-                                    SnackBar(content: Text("Errore: $e")),
+                                  // ---- Dialog di ERRORE ----
+                                  showDialog(
+                                    context: context,
+                                    barrierDismissible: false,
+                                    builder: (context) => Dialog(
+                                      shape: RoundedRectangleBorder(
+                                        borderRadius: BorderRadius.circular(16),
+                                      ),
+                                      child: Stack(
+                                        children: [
+                                          Padding(
+                                            padding: const EdgeInsets.all(24.0),
+                                            child: SingleChildScrollView(
+                                              child: Column(
+                                                mainAxisSize: MainAxisSize.min,
+                                                children: [
+                                                  // ---- SizedBox al posto dell'immagine ----
+                                                  SvgPicture.asset(
+                                                    'assets/icons/dialog_error.svg',
+                                                    width: 270,
+                                                    height: 370,
+                                                    fit: BoxFit.contain,
+                                                  ),
+
+                                                  // ---- Testo con colore dal tema ----
+                                                  Text(
+                                                    "Errore nell'invio della richiesta.",
+                                                    style: TextStyle(
+                                                      color: Theme.of(
+                                                        context,
+                                                      ).colorScheme.error,
+                                                      fontSize: 16,
+                                                      fontWeight:
+                                                          FontWeight.w600,
+                                                    ),
+                                                    textAlign: TextAlign.center,
+                                                  ),
+                                                  const SizedBox(height: 24),
+                                                  // ---- Pulsante RIPROVA ----
+                                                  SizedBox(
+                                                    width: double.infinity,
+                                                    child: OutlinedButton(
+                                                      style:
+                                                          OutlinedButton.styleFrom(
+                                                            backgroundColor:
+                                                                Colors
+                                                                    .transparent,
+                                                            side: BorderSide(
+                                                              color: themes
+                                                                  .primary,
+                                                            ),
+                                                          ),
+                                                      onPressed: () =>
+                                                          Navigator.of(
+                                                            context,
+                                                          ).pop(),
+                                                      child: const Text(
+                                                        "RIPROVA",
+                                                      ),
+                                                    ),
+                                                  ),
+                                                ],
+                                              ),
+                                            ),
+                                          ),
+
+                                          // ---- Croce in alto a destra ----
+                                          Positioned(
+                                            right: 0,
+                                            top: 0,
+                                            child: IconButton(
+                                              icon: Icon(
+                                                Icons.close,
+                                                size: IconSize.s34,
+                                                color: themes.surfaceDim,
+                                              ),
+                                              onPressed: () =>
+                                                  Navigator.of(context).pop(),
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                    ),
                                   );
                                 }
                               },

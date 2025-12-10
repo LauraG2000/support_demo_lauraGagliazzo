@@ -11,6 +11,7 @@ class CustomColors {
   // Text
   static const Color textPrimary = Color.fromRGBO(58, 58, 58, 1);
   static const Color textSecondary =  Color.fromRGBO(181, 181, 181, 1);
+  static const Color textError =  Color.fromRGBO(255, 99, 68, 1);
 
   // Cards / Surfaces
   static const Color card = Color.fromRGBO(255, 255, 255, 1);

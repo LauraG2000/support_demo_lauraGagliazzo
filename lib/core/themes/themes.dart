@@ -14,7 +14,7 @@ class Themes {
       secondary: CustomColors.textSecondary,
       onSecondary: Colors.white,
       error: Colors.red,
-      onError: Colors.red,
+      onError: CustomColors.textError,
       onSurface: CustomColors.background,
       surfaceContainerHighest: CustomColors.iconAdd,
       surface: CustomColors.card,
